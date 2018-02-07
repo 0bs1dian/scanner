@@ -30,31 +30,43 @@ do
 
   if [[ $start -lt 500 ]]
    then
+    #echo "Pass on ports" $start " to " $end
+    #cat $1.txt | grep open | grep -v Discovered
     echo -ne "[#          ]  5%  \r"
   #These are toooootally random percentages by the way.
   fi
   if [[ $start -gt 501 ]]
    then
+    echo "Pass on ports" $start " to " $end
+    cat $1.txt | grep open | grep -v Discovered
     echo -ne "[#          ] 11%  \r"
   fi
   if [[ $start -gt 2001 ]]
    then
+    echo "Pass on ports" $start " to " $end
+    cat $1.txt | grep open | grep -v Discovered
     echo -ne "[##         ] 20%  \r"
   fi
   if [[ $start -gt 9999 ]]
    then
+    echo "Pass on ports" $start " to " $end
+    cat $1.txt | grep open | grep -v Discovered
     echo -ne "[###        ] 30%  \r"
   fi
   if [[ $start -gt 30000 ]]
    then
+    echo "Pass on ports" $start " to " $end
+    cat $1.txt | grep open | grep -v Discovered
     echo -ne "[###        ] 40%  \r"
   fi
   if [[ $start -gt 60000 ]]
    then
+    echo "Pass on ports " $start " to " $end
+    cat $1.txt | grep open | grep -v Discovered
     echo -ne "[#####     ]  49%  \r"
   fi
   #These nmap values are VERY flexible for you, adjust as necessary.
-  nmap -vv --max-rtt-timeout 500ms --scan-delay 4ms --max-retries 1 -vv -sS --open -p $start-$end $1 >> $1.txt
+  nmap -Pn --max-rtt-timeout 500ms --scan-delay 4ms --max-retries 1 -vv -sS --open -p $start-$end $1 >> $1.txt
 
   sleep 1
 
@@ -76,16 +88,18 @@ do
 done
 
 sleep 2
-echo -ne "[######    ]  60% Scanning UDP \r"
-nmap -sU --top-ports 150 --open $1 >> $1_udp.txt
-echo -ne "[########  ]  80% Service ID   \r"
-cat $1.txt | grep open | grep -v "Discovered" | cut -d "/" -f1 > tcp.txt;echo "TCP:" >> $1_final.txt;cat tcp.txt|while read line; do nmap -p $line -sV 10.11.1.72 | grep open >> $1_final.txt; done
-echo "UDP:" >> $1_final.txt
+echo -ne "[######    ]  60% Quick Scanning UDP \r"
+nmap -sU -Pn --top-ports 150 --open $1 >> $1_udp.txt
+#echo -ne "[########  ]  80% Service ID   \r"
+#cat $1.txt | grep open | grep -v "Discovered" | cut -d "/" -f1 > tcp.txt;echo "TCP:" >> $1_final.txt;cat tcp.txt|while read line; do nmap -Pn -p $line -sV 10.11.1.72 | grep open >> $1_final.txt; done
+#echo "UDP:" >> $1_final.txt
 echo -ne "[##########]  92% almost done..\r"
 sleep 2
+echo "TCP Ports Results:" >> $1_final.txt
+cat $1.txt | grep open | grep -v Discovered >> $1_final.txt
+echo "UDP Ports Results:" >> $1_final.txt
 cat $1_udp.txt | grep open >> $1_final.txt
-rm $1.txt
-mv $1_final.txt $1.txt
-rm tcp.txt $1_udp.txt
+
 echo -ne "[##########]  100% Done!...\n"
 cat $1_final.txt
+echo "Scan complete.  Try harder."
